@@ -1,7 +1,7 @@
 const axios = require('axios');
 const http = require('http');
 
-// --- إضافة سيرفر بسيط لإبقاء الخدمة تعمل على Koyeb ---
+// --- إعداد سيرفر لإبقاء الخدمة حية على Koyeb ---
 http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('System is Live and Running...\n');
@@ -10,14 +10,26 @@ http.createServer((req, res) => {
 console.log("🌐 Web server active to keep the process alive.");
 // --------------------------------------------------
 
+// دالة العد التنازلي المعدلة لتظهر في Logs المواقع السحابية
 const countdown = async (seconds) => {
-    for (let i = seconds; i > 0; i--) {
-        const mins = Math.floor(i / 60);
-        const secs = i % 60;
-        process.stdout.write(`\r⏳ Waiting for Hourly Reset: ${mins}m ${secs}s...    `);
+    let remaining = seconds;
+    console.log(`⏳ Cooldown started for ${Math.floor(seconds / 60)} minutes.`);
+    
+    while (remaining > 0) {
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+
+        // تحديث السجل كل 5 دقائق (300 ثانية) أو عندما يتبقى أقل من دقيقة
+        if (remaining % 300 === 0 || remaining < 60) {
+            if (remaining % 60 === 0 || remaining < 10) {
+                console.log(`\r⏳ Status: Waiting... ${mins}m ${secs}s left.`);
+            }
+        }
+
         await new Promise(resolve => setTimeout(resolve, 1000));
+        remaining--;
     }
-    console.log('\r✅ Time is up! Waking up now...      ');
+    console.log('\n✅ Time is up! Waking up now...      ');
 };
 
 const userAgents = [
@@ -29,14 +41,13 @@ async function startSystem() {
     const creditUrl = 'https://twitter-followers-api.toolkity.com/credit';
     const blastUrl = 'https://twitter-followers-api.toolkity.com/f0lIlO0O0O0Ow/Mhmd1057718';
     
-    // يفضل وضع التوكن في Environment Variables، لكن سأتركه هنا كما هو في كودك ليعمل فوراً
+    // التوكن الخاص بك
     const token = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTc2MTM0OTY4MzQyMTUxMTY4MCIsImFwcCI6ImZvbGxvd2VycyIsImlhdCI6MTc2NjU2NDEyNCwiZXhwIjoxNzY2NjUwNTI0fQ.FTnkYbNm74O7N7v9hEkQRBDeWoVSDuxEAe3bUIvDzMw';
 
     let waveCount = 1;
-    // تم إزالة شرط الـ 10 موجات ليعمل للأبد 24 ساعة
     console.log(`🚀 Ultra-Fast Monitor Active: Target 60 requests per wave.`);
 
-    while (true) { // تغيير هنا ليصبح لانهائي
+    while (true) { 
         try {
             const res = await axios.get(creditUrl, {
                 headers: { 'authorization': token, 'user-agent': userAgents[0] }
@@ -46,7 +57,7 @@ async function startSystem() {
             console.log(`\n📊 Status Check -> Current Credits: [${credit}]`);
 
             if (credit === 0) {
-                console.log(`⚠️ Credit is 0. Entering Forced Cooldown...`);
+                console.log(`⚠️ Credit is 0. Entering Forced Cooldown (1 Hour)...`);
                 await countdown(3615); 
                 continue; 
             }
