@@ -1,0 +1,12 @@
+{
+  "name": "twitter-auto-blast",
+  "version": "1.0.0",
+  "description": "Continuous monitor and blaster",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
